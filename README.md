@@ -2,6 +2,8 @@
 
 I went through the [FreeInference agentic trace](https://huggingface.co/datasets/harvardMadsys/freeinference_agentic_trace) to see what happens to the prompt cache while an agent waits on a tool.
 
+![The cache is gone for one step, then back](figure.png)
+
 Two things came out of it:
 
 - After the model asks for a tool, the next request is back within a minute 95.8% of the time, with almost the same prompt.
@@ -17,6 +19,8 @@ huggingface-cli download harvardMadsys/freeinference_agentic_trace --repo-type d
   --include "release/*/processed/requests.parquet" "release/*/processed/sessions.parquet" --local-dir data
 python numbers.py data
 ```
+
+`python figure.py` redraws the figure (it needs `matplotlib`).
 
 It takes a few minutes and should print what is in [expected.txt](expected.txt).
 
