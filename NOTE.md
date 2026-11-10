@@ -2,13 +2,17 @@
 
 Observations from the FreeInference agentic trace. Marc Frances, November 2026.
 
-Every figure below is printed by `numbers.py`; the full output is in `expected.txt`, and the section numbers match its tables.
+![The share of each prompt served from cache is 99% on the step before, 0.5% on the step itself and 99% on the step after](figure.png)
 
-## Summary
+## The finding
 
-- After a response that ends in a tool call, the same session sends its next request within one minute in 95.8% of cases, with a prompt that is almost unchanged. Reuse of the cached prefix is therefore close to certain, and the server can tell from its own output.
-- Nevertheless, 1 in 295 tool-loop steps is served with less than half of the previous prompt from cache. These steps account for 10.7% of all uncached prompt tokens in the trace.
-- In 88.4% of them, what remains cached is no larger than the system prompt and tool definitions, which is what a request would find on a machine that had not served the session before.
+When a model asks for a tool, the same session sends its next request within one minute in 95.8% of cases, with almost the same prompt. The cached prompt is therefore nearly certain to be needed again, and the server can tell from its own output.
+
+Yet 1 in 295 of these steps is served with less than half of the previous prompt from cache. The figure shows what that looks like: 99% of the prompt comes from cache on the step before, 0.5% on the step itself, and 99% again on the step after.
+
+These steps are rare (3,463 of 1,222,199 requests) but hold 10.7% of all uncached prompt tokens in the trace. In 88.4% of them, what remains cached is no larger than the system prompt and tool definitions, which is what a request would find on a machine that had not served the session before.
+
+The rest of this note gives the full data. Every figure is printed by `numbers.py`; the complete output is in `expected.txt`, and the section numbers below match its tables where they overlap.
 
 ## 1. Data and definitions
 
@@ -46,6 +50,14 @@ A cache normally holds what might be requested again. After a tool call the next
 | F | 11,103 | 154 | 72 | 6.0 s | 9.0 s | 4.3 s |
 
 **What remains cached.** In 18.3% of these steps nothing is cached. In 88.4% the cached part is no larger than the system prompt plus tool definitions (92.6% if the estimate of their size is allowed to be 25% too low). The median step keeps 0.5% of the previous prompt, while the system prompt and tools make up 16.0% of a prompt at the median. The part that survives is the part every session shares.
+
+**The steps around it.** Median share of each prompt served from cache, relative to the step that loses half (this is the figure above):
+
+| Step | 3 before | 2 before | 1 before | the step | 1 after | 2 after | 3 after |
+|---|---|---|---|---|---|---|---|
+| Median | 99.2% | 99.2% | 99.0% | 0.5% | 99.0% | 99.2% | 99.2% |
+| Lower quartile | 95.5% | 94.5% | 90.1% | 0.0% | 94.6% | 96.3% | 96.4% |
+| Upper quartile | 99.8% | 99.8% | 99.7% | 5.1% | 99.7% | 99.8% | 99.8% |
 
 **Timing.** The rate does not go to zero for short waits, and rises with longer ones:
 
@@ -113,4 +125,4 @@ The trace cannot answer this. The gateway's logs could, since they record where 
 
 ## Reproduction
 
-See the README. `python numbers.py data` prints all tables in a few minutes.
+See the README. `python numbers.py data` prints all tables in a few minutes and writes `around.csv`; `python figure.py` then redraws the figure.
