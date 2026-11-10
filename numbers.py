@@ -107,3 +107,19 @@ group by provider
 having sum(lost_half::int) >= 100
 order by loop_steps desc
 """)
+
+# The prompt of such a step should really start with the whole previous prompt.
+# The last block of the previous prompt can be partial, so it is left out.
+show("4. Does the prompt of such a step really start with the previous prompt?", f"""
+with hit as (select session_id, step, prev_step from loop_steps where lost_half),
+     blocks as (
+         select session_id, step, block_ids from {requests}
+         where (session_id, step) in (select session_id, step from hit)
+            or (session_id, step) in (select session_id, prev_step from hit))
+select count(*) as checked,
+       sum((list_slice(cur.block_ids, 1, len(prev.block_ids) - 1)
+            = list_slice(prev.block_ids, 1, len(prev.block_ids) - 1))::int) as starts_with_previous_prompt
+from hit
+join blocks cur  on cur.session_id = hit.session_id and cur.step = hit.step
+join blocks prev on prev.session_id = hit.session_id and prev.step = hit.prev_step
+""")
