@@ -38,6 +38,7 @@ with r as (
 s as (select distinct session_id, user_id, harness from {sessions})
 select r.*, s.user_id, s.harness,
        head_estimate * prompt / nullif(all_roles, 0) as head,
+       row_number()  over w as pos,
        lag(step)     over w as prev_step,
        lag(prompt)   over w as prev_prompt,
        lag(end_ms)   over w as prev_end,
@@ -221,3 +222,21 @@ from hit
 join blocks cur  on cur.session_id = hit.session_id and cur.step = hit.step
 join blocks prev on prev.session_id = hit.session_id and prev.step = hit.prev_step
 """)
+
+# Share of each prompt served from cache in the steps around one that loses half.
+# Saved to around.csv, which figure.py draws.
+around = db.sql("""
+select s.pos - e.pos as steps_from_the_losing_step,
+       count(*) as steps,
+       round(100 * median(s.cached / s.prompt), 1) as median_pct_of_prompt_cached,
+       round(100 * quantile_cont(s.cached / s.prompt, 0.25), 1) as lower_quartile,
+       round(100 * quantile_cont(s.cached / s.prompt, 0.75), 1) as upper_quartile
+from loop_steps e
+join steps s on s.session_id = e.session_id and s.pos between e.pos - 3 and e.pos + 3
+where e.lost_half and s.cached is not null
+group by 1
+order by 1
+""")
+print("\n10. Share of the prompt served from cache in the steps around one that loses half")
+around.show(max_width=300)
+around.write_csv("around.csv")
