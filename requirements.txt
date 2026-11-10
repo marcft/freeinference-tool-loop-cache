@@ -1,2 +1,3 @@
 duckdb
 huggingface_hub
+matplotlib
