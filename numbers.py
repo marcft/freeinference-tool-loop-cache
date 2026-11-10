@@ -93,3 +93,17 @@ select count(*) as loop_steps,
        count(distinct harness) filter (where lost_half) as harnesses
 from loop_steps
 """)
+
+show("3. The same, by provider, with the median time to first token before, at and after such a step (ms)", """
+select provider,
+       count(*) as loop_steps,
+       sum(lost_half::int) as lost_half,
+       round(count(*) / sum(lost_half::int)) as one_in,
+       round(median(prev_ttft) filter (where lost_half)) as ttft_before,
+       round(median(ttft_ms)   filter (where lost_half)) as ttft_at,
+       round(median(next_ttft) filter (where lost_half)) as ttft_after
+from loop_steps
+group by provider
+having sum(lost_half::int) >= 100
+order by loop_steps desc
+""")
