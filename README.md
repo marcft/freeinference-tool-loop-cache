@@ -4,7 +4,7 @@ I went through the [FreeInference agentic trace](https://huggingface.co/datasets
 
 ![The cache is gone for one step, then back](figure1.png)
 
-*Share of each prompt served from cache, in the steps around one that loses its cache (medians and quartiles over 3,463 such steps).*
+**Figure 1. The prompt cache is lost for a single step.** Share of each prompt served from cache at the steps around a cache loss (step 0), defined as a tool-loop step where less than half of the previous prompt is served from cache. Points are medians and bars span the quartiles (n = 3,463 at step 0; 3,024 to 3,231 at the others). Steps are selected only by the condition at step 0; neighbouring steps are not conditioned on.
 
 Two things came out of it:
 

@@ -4,7 +4,7 @@ Observations from the FreeInference agentic trace. Marc Frances, November 2026.
 
 ![The share of each prompt served from cache is 99% on the step before, 0.5% on the step itself and 99% on the step after](figure1.png)
 
-*Figure 1. Share of each prompt served from cache in the steps of a session around one that loses its cache. Points are medians over the 3,463 such steps; bars span the lower and upper quartiles.*
+**Figure 1. The prompt cache is lost for a single step.** Share of each prompt served from cache at the steps around a cache loss (step 0), defined as a tool-loop step where less than half of the previous prompt is served from cache. Points are medians and bars span the quartiles (n = 3,463 at step 0; 3,024 to 3,231 at the others). Steps are selected only by the condition at step 0; neighbouring steps are not conditioned on.
 
 ## The finding
 
