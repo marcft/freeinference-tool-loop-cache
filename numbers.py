@@ -64,3 +64,32 @@ select count(*) as tool_call_responses,
 from steps
 where finish_reason = 'tool_calls'
 """)
+
+# A tool-loop step: it waited on a tool, its prompt only extends the previous one,
+# and it went to the same provider and model less than a minute after the previous step ended.
+# It "loses half" when under half of the previous prompt is served from cache.
+db.sql("""
+create view loop_steps as
+select *,
+       greatest(prev_prompt - cached, 0) as lost,
+       prev_prompt >= 4096 and cached < 0.5 * prev_prompt as lost_half
+from steps
+where waited_for = 'tool' and transition = 'append'
+  and cached is not null and prev_prompt is not null
+  and provider = prev_provider and model = prev_model
+  and start_ms - prev_end >= 0 and start_ms - prev_end < 60000
+""")
+
+show("2. Tool-loop steps that lose more than half of the previous prompt from cache", """
+select count(*) as loop_steps,
+       sum(lost_half::int) as lost_half,
+       round(count(*) / sum(lost_half::int), 1) as one_in,
+       round(100 * sum(lost) filter (where lost_half)
+             / (select sum(prompt - cached) from steps where cached is not null), 1) as pct_of_all_uncached_tokens,
+       round(100 * avg((next_cached >= 0.9 * prompt)::int)
+             filter (where lost_half and next_transition = 'append' and next_cached is not null), 1) as pct_cached_again_next_step,
+       round(100 * avg(coalesce(cached <= head, false)::int) filter (where lost_half), 1) as pct_at_most_system_and_tools,
+       count(distinct user_id) filter (where lost_half) as users,
+       count(distinct harness) filter (where lost_half) as harnesses
+from loop_steps
+""")
