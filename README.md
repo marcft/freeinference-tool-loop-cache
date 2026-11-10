@@ -1,5 +1,7 @@
 # Tool loops and the prompt cache
 
+If you're reading this, you were curious about my results. Cool :) How it was made: I used Claude to write the analysis code and draft the text. I reran everything and checked each number against the script's output myself, so any mistakes are mine.
+
 I went through the [FreeInference agentic trace](https://huggingface.co/datasets/harvardMadsys/freeinference_agentic_trace) to see what happens to the prompt cache while an agent waits on a tool.
 
 ![The cache is gone for one step, then back](figure1.png)
