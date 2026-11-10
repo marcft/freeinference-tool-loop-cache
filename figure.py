@@ -1,4 +1,4 @@
-"""Draws figure.png from around.csv, which numbers.py writes."""
+"""Draws figure1.png from around.csv, which numbers.py writes."""
 import csv
 
 import matplotlib
@@ -35,4 +35,4 @@ ax.tick_params(top=True, right=True, length=3, width=0.6)
 ax.set_xlabel("Step relative to the step that loses its cache")
 ax.set_ylabel("Prompt served from cache (%)")
 fig.tight_layout(pad=0.4)
-fig.savefig("figure.png")
+fig.savefig("figure1.png")
