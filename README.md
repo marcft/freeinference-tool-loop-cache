@@ -4,6 +4,8 @@ I went through the [FreeInference agentic trace](https://huggingface.co/datasets
 
 ![The cache is gone for one step, then back](figure.png)
 
+*Share of each prompt served from cache, in the steps around one that loses its cache (medians and quartiles over 3,463 such steps).*
+
 Two things came out of it:
 
 - After the model asks for a tool, the next request is back within a minute 95.8% of the time, with almost the same prompt.
