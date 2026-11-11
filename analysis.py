@@ -35,8 +35,8 @@ with r as (
              + coalesce(role_tokens['tool_definitions'], 0) as all_roles
     from {requests}
 ),
-s as (select distinct session_id, user_id, harness from {sessions})
-select r.*, s.user_id, s.harness,
+s as (select distinct session_id, user_id, harness, parent_session_id from {sessions})
+select r.*, s.user_id, s.harness, s.parent_session_id,
        head_estimate * prompt / nullif(all_roles, 0) as head,
        row_number()  over w as pos,
        lag(step)     over w as prev_step,
@@ -52,6 +52,15 @@ select r.*, s.user_id, s.harness,
        lead(ttft_ms)    over w as next_ttft
 from r left join s using (session_id)
 window w as (partition by session_id order by step)
+""")
+
+# Sessions started by a subagent have a parent session; the dataset card counts the others.
+show("0. The trace", """
+select count(*) as requests,
+       count(*) filter (where parent_session_id is null) as requests_in_top_level_sessions,
+       count(*) filter (where cached is not null) as requests_with_a_cache_number,
+       round(sum(prompt - cached) filter (where cached is not null) / 1e9, 2) as uncached_tokens_billions
+from steps
 """)
 
 show("1. After a response, does the session come back? (tool call against a normal final answer)", """
@@ -173,9 +182,11 @@ having count(*) >= 5000
 order by loop_steps desc
 """)
 
+# Weeks are the release's own: seven days from 2026-05-17 00:00 UTC. Counting from that
+# instant keeps the result the same in every time zone.
 show("7b. By week and by user", """
 with weekly as (
-    select date_trunc('week', to_timestamp(start_ms / 1000)) as wk,
+    select (start_ms - 1778976000000) // 604800000 as wk,
            count(*) as n, sum(lost_half::int) as k
     from loop_steps group by 1),
 by_user as (
@@ -240,3 +251,16 @@ order by 1
 print("\n10. Share of the prompt served from cache in the steps around one that loses half")
 around.show(max_width=300)
 around.write_csv("around.csv")
+
+# The gateway's rule that sends a request elsewhere when its pinned endpoint is backlogged
+# was merged on 2026-08-16 (HarvardMadSys/hybridInference #1267). That day starts the last
+# three weeks of the trace: 1786838400000 is 2026-08-16 00:00 UTC in milliseconds.
+show("11. Before and after 2026-08-16, when the gateway's backlog rule was merged", """
+select case when start_ms < 1786838400000 then '1. before' else '2. from 2026-08-16' end as period,
+       count(*) as loop_steps,
+       sum(lost_half::int) as lost_half,
+       round(count(*) / sum(lost_half::int)) as one_in
+from loop_steps
+group by 1
+order by 1
+""")
