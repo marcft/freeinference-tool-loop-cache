@@ -2,7 +2,7 @@
 
 If you're reading this, you were curious about my results. Cool :) How it was made: I used Claude to write the analysis code and draft the text. I reran everything and checked each number against the script's output myself, so any mistakes are mine.
 
-I went through the [FreeInference agentic trace](https://huggingface.co/datasets/harvardMadsys/freeinference_agentic_trace) to see what happens to the prompt cache while an agent waits on a tool.
+I went through the [FreeInference agentic trace](https://huggingface.co/datasets/harvardMadsys/freeinference_agentic_trace), which the Harvard MadSys Lab released with their paper [*From Requests to Sessions*](https://doi.org/10.5281/zenodo.23903440) (Nixon et al., 2026), to see what happens to the prompt cache while an agent waits on a tool.
 
 ![The cache is gone for one step, then back](figure1.png)
 

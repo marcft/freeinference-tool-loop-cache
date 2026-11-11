@@ -1,6 +1,6 @@
 # Prompt-cache loss inside tool loops
 
-Observations from the FreeInference agentic trace. Marc Frances, November 2026.
+Observations from the FreeInference agentic trace [1]. Marc Frances, November 2026.
 
 ![The share of each prompt served from cache is 99% on the step before, 0.5% on the step itself and 99% on the step after](figure1.png)
 
@@ -18,7 +18,9 @@ The rest of this note gives the full data. Every figure is printed by `numbers.p
 
 ## 1. Data and definitions
 
-The trace covers 16 weeks of coding-agent traffic through FreeInference: 1,222,199 requests. For each request it records the prompt size, the number of prompt tokens the provider reports as served from cache, timings, and what the step was waiting for.
+The trace was released with *From Requests to Sessions* [1]. It covers 16 weeks of coding-agent traffic through FreeInference: 1,222,199 requests. (The dataset card counts 1,186,582, in top-level sessions only; the released files also contain subagent sessions, which are included here.) For each request it records the prompt size, the number of prompt tokens the provider reports as served from cache, timings, and what the step was waiting for.
+
+The paper reports a mean cache hit ratio of 97.5% across ordinary tool calls and concludes that current retention policies already capture most reuse within tool loops [1]. This note looks at the steps where that reuse fails, and at how many tokens they hold.
 
 - **Tool-loop step.** A request that waited on a tool, whose prompt only extends the previous prompt of the session, and that was sent to the same provider and model less than 60 seconds after the previous step ended. There are 1,021,835.
 - **Losing half.** A tool-loop step whose previous prompt had at least 4,096 tokens and of which less than half was served from cache.
@@ -128,3 +130,7 @@ The trace cannot answer this. The gateway's logs could, since they record where 
 ## Reproduction
 
 See the README. `python numbers.py data` prints all tables in a few minutes and writes `around.csv`; `python figure.py` then redraws the figure.
+
+## References
+
+[1] William Nixon, Muxin Tian, Yunjia Zheng, Haryadi S. Gunawi and Juncheng Yang. *From Requests to Sessions: A Large-Scale Characterization of Human-Driven Agentic Workloads.* Zenodo, 2026. https://doi.org/10.5281/zenodo.23903440
