@@ -18,14 +18,14 @@ Two things came out of it:
 ## Run it
 
 ```
-pip install duckdb huggingface_hub
-huggingface-cli download harvardMadsys/freeinference_agentic_trace --repo-type dataset \
-  --include "release/*/processed/requests.parquet" "release/*/processed/sessions.parquet" --local-dir data
-python numbers.py data
+pip install -r requirements.txt
+hf download harvardMadsys/freeinference_agentic_trace --repo-type dataset \
+  --include "release/*/processed/requests.parquet" \
+  --include "release/*/processed/sessions.parquet" --local-dir data
+python analysis.py data
+python figure.py
 ```
 
-`python figure.py` redraws the figure (it needs `matplotlib`).
-
-It takes a few minutes and should print what is in [expected.txt](expected.txt).
+The download is about 7.8 GB. `analysis.py` takes a few minutes and should print what is in [expected.txt](expected.txt); `figure.py` then redraws the figure.
 
 Marc Frances
