@@ -1,4 +1,4 @@
-"""Draws figure1.png from around.csv, which numbers.py writes."""
+"""Draws figure1.png from around.csv, which analysis.py writes."""
 import csv
 
 import matplotlib

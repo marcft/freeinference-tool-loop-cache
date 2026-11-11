@@ -14,7 +14,7 @@ Yet 1 in 295 of these steps is served with less than half of the previous prompt
 
 These steps are rare (3,463 of 1,222,199 requests) but hold 10.7% of all uncached prompt tokens in the trace. In 88.4% of them, what remains cached is no larger than the system prompt and tool definitions, which is what a request would find on a machine that had not served the session before.
 
-The rest of this note gives the full data. Every figure is printed by `numbers.py`; the complete output is in `expected.txt`, and the section numbers below match its tables where they overlap.
+The rest of this note gives the full data. Every figure is printed by `analysis.py`; the complete output is in `expected.txt`, and the section numbers below match its tables where they overlap.
 
 ## 1. Data and definitions
 
@@ -129,7 +129,7 @@ The trace cannot answer this. The gateway's logs could, since they record where 
 
 ## Reproduction
 
-See the README. `python numbers.py data` prints all tables in a few minutes and writes `around.csv`; `python figure.py` then redraws the figure.
+See the README. `python analysis.py data` prints all tables in a few minutes and writes `around.csv`; `python figure.py` then redraws the figure.
 
 ## References
 

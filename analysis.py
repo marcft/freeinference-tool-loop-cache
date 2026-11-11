@@ -1,7 +1,7 @@
 """What happens to the prompt cache while an agent waits on a tool.
 
 Prints the numbers in NOTE.md from the FreeInference agentic trace.
-Usage: python numbers.py [folder holding the trace]    (default: data)
+Usage: python analysis.py [folder holding the trace]    (default: data)
 """
 import sys
 
