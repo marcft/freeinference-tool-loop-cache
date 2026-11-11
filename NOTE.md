@@ -14,7 +14,7 @@ Yet 1 in 295 of these steps is served with less than half of the previous prompt
 
 These steps are rare (3,463 of 1,222,199 requests) but hold 10.7% of all uncached prompt tokens in the trace. In 88.4% of them, what remains cached is no larger than the system prompt and tool definitions, which is what a request would find on a machine that had not served the session before.
 
-The rest of this note gives the full data. Every figure is printed by `analysis.py`; the complete output is in `expected.txt`, and the section numbers below match its tables where they overlap.
+The rest of this note gives the full data. Every figure is printed by `analysis.py`, and the complete output is in `expected.txt`.
 
 ## 1. Data and definitions
 
@@ -109,7 +109,7 @@ A rate of 0.27% within one second is hard to attribute to a retention time expir
 | cline | 10,411 | 60 | 174 | 4 |
 | openclaw | 7,996 | 25 | 320 | 2 |
 
-**Time and users.** Such steps occur in every calendar week of the trace, from 1 in 25 in the most affected week to 1 in 703 in the least, with a median of 1 in 291. The user with the largest loss accounts for 11.0% of it.
+**Time and users.** Such steps occur in each of the 16 weeks of the trace, from 1 in 23 in the most affected week to 1 in 722 in the least, with a median of 1 in 318. The user with the largest loss accounts for 11.0% of it.
 
 **The prompts are true extensions.** For all 3,463 steps, the block ids of the prompt begin with the block ids of the previous prompt.
 
@@ -117,15 +117,15 @@ A rate of 0.27% within one second is hard to attribute to a retention time expir
 
 - **Cause.** The trace has no machine or replica identifiers. A request that reached a different machine and a request whose cache was evicted look the same. The signature in section 3 suggests the former but does not establish it.
 - **Provider-reported cache numbers.** The cached-token count is what each provider reports. Time to first token agrees with it (section 3), but it is not an independent measurement.
-- **Requests without a cache number.** 32,738 otherwise qualifying steps report none and are excluded (counting the seven providers with at least 100 such steps). Their median time to first token lies between a hit and a miss on provider A (5.0 s, against 0.7 s and 19.3 s), matches a miss on provider C, and matches a hit on provider D. If some are misses, the figures above are lower bounds.
+- **Requests without a cache number.** 32,738 otherwise qualifying steps report none and are excluded (counting the seven providers with at least 100 such steps). Their median time to first token lies between a hit and a miss on provider A (5.0 s, against 0.7 s and 19.3 s), matches a miss on provider C, and is no slower than a hit on provider D. If some are misses, the figures above are lower bounds.
 - **Estimated sizes.** The size of the system prompt and tool definitions is an estimate in the trace, so the 88.4% is approximate.
 - **Heterogeneity.** The rate ranges from 1 in 72 to 1 in 824 across providers. More than one mechanism is likely.
 
 ## 6. Open question
 
-The FreeInference gateway pins each caller to an endpoint and releases the pin once the endpoint is too busy. When the next step is almost certain and carries about 120K tokens, under what conditions is waiting for the machine that holds them cheaper than moving to a free one?
+The FreeInference gateway pins each caller to an endpoint, and sends a single request elsewhere when that endpoint's backlog is too high. The steps counted here all stay on the same provider and model (the trace marks a change of either as a different kind of step), so if they are moves, they happen below what the trace records: between endpoints behind one provider label, or inside the provider. About two thirds of them (2,265 of 3,463) came before the backlog rule was merged into the gateway's code on 16 August, at 1 in 268 against 1 in 347 after, so that rule is not their main cause.
 
-The trace cannot answer this. The gateway's logs could, since they record where each step was sent and how long it would have waited.
+When the next step is almost certain and carries about 120K tokens, under what conditions is waiting for the machine that holds them cheaper than moving to a free one? The trace cannot answer this. The gateway's logs could, since they record where each step was sent and how long it would have waited. If they show these steps going to the same endpoint as the step before, the gateway did not move them, and the question belongs to the provider's own routing instead.
 
 ## Reproduction
 
